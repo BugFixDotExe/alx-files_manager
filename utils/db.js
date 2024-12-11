@@ -1,45 +1,41 @@
 const { MongoClient } = require('mongodb');
-require('dotenv').config();
 
 class DBClient {
   constructor() {
-    const host = process.env.DB_HOST || 'localhost'
-    const port = process.env.DB_PORT || 27017
-    const database = process.env.DB_DATABASE || 'files_manager'
-    this.dbClient = new MongoClient(`mongodb+srv://${host}:${port}/${database}`);
+    const host = process.env.DB_HOST || 'localhost';
+    const port = parseInt(process.env.DB_PORT, Number) || 27017;
+    const database = process.env.DB_DATABASE || 'files_manager';
+
+    const uri = `mongodb://${host}:${port}/${database}`;
+
+    this.client = new MongoClient(uri);
   }
 
   isAlive() {
-    if (!this.dbClient.isConnected()) {
-      return this.dbClient
-        .connect()
-        .then(() => true).catch(() => false);
-    }
-    return true;
+    return this.client.connect()
+      .then(true)
+      .catch(() => false);
   }
 
   async nbUsers() {
     if (this.isAlive()) {
-      try {
-        return this.dbClient.users.count();
-      } catch (error) {
-        console.log(error);
-      }
+      const dataBase = await this.client.db();
+      const count = await dataBase.collection('users').countDocuments();
+      return count;
     }
-    return false;
+    return 0;
   }
 
   async nbFiles() {
     if (this.isAlive()) {
-      try {
-        return this.dbClient.files.count();
-      } catch (error) {
-        console.log(error);
-      }
+      const dataBase = await this.client.db();
+      const count = await dataBase.collection('files').countDocuments();
+      return count;
     }
-    return false;
+    return 0;
   }
 }
 
 const dbClient = new DBClient();
-export default dbClient;
+
+module.exports = dbClient;
