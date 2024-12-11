@@ -12,9 +12,14 @@ class DBClient {
   }
 
   isAlive() {
-    return this.client.connect()
-      .then(true)
-      .catch(() => false);
+    const isConnected = new Promise((resolve) => {
+      try {
+        this.client.connect().then(() => true);
+        resolve();
+      } catch (err) { return false; }
+    })
+    if (!isConnected) { return false; }
+    return true;
   }
 
   async nbUsers() {
