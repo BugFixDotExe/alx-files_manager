@@ -3,10 +3,10 @@ require('dotenv').config();
 
 class DBClient {
   constructor() {
-    this.host = process.env.DB_HOST || 'localhost'
-    this.port = process.env.DB_PORT || 27017
-    this.database = process.env.DB_DATABASE || 'files_manager'
-    this.dbClient = new MongoClient(`mongodb://${this.host}:${this.port}/${this.database}`);
+    const host = process.env.DB_HOST || 'localhost'
+    const port = process.env.DB_PORT || 27017
+    const database = process.env.DB_DATABASE || 'files_manager'
+    this.dbClient = new MongoClient(`mongodb+srv://${host}:${port}/${database}`);
   }
 
   isAlive() {
