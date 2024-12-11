@@ -18,7 +18,6 @@ class RedisClient {
     }
   }
 
-
   async get(key) {
     try {
       const fetchedData = await this.redisClientConnection.get(key);
@@ -28,7 +27,6 @@ class RedisClient {
       return null;
     }
   }
-
 
   async set(key, incomingData, duration) {
     try {
