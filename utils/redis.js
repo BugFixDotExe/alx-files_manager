@@ -6,15 +6,6 @@ class RedisClient {
     this.redisClientConnection.on('error', (error) => {
       console.error('Redis error:', error);
     });
-    this.connect();
-  }
-
-  async connect() {
-    try {
-      await this.redisClientConnection.connect();
-    } catch (error) {
-      console.error('Error connecting to Redis:', error);
-    }
   }
 
   isAlive() {
@@ -30,6 +21,7 @@ class RedisClient {
   async get(key) {
     try {
       const fetchedData = await this.redisClientConnection.get(key);
+      console.log(`Fetched data ${JSON.parse(fetchedData)}`);
       return fetchedData ? JSON.parse(fetchedData) : null;
     } catch (err) {
       console.error('Error fetching data from Redis:', err);
@@ -39,7 +31,7 @@ class RedisClient {
 
   async set(key, incomingData, duration) {
     try {
-      await this.redisClientConnection.set(key, JSON.stringify(incomingData), 'EX', duration);
+      await this.redisClientConnection.set(key, incomingData, 'EX', duration);
     } catch (err) {
       console.error('Error setting data in Redis:', err);
     }
@@ -48,6 +40,7 @@ class RedisClient {
   async del(key) {
     try {
       await this.redisClientConnection.del(key);
+      console.log(`Data deleted for key: ${key}`);
     } catch (err) {
       console.error('Error deleting data from Redis:', err);
     }
