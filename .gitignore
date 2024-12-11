@@ -2,3 +2,4 @@
 /express-api/
 /learning-jwt/
 /user-auth-api/
+.env
