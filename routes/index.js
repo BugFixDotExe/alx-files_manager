@@ -1,11 +1,11 @@
 const express = require('express')
 
 const app = express()
-const { getStats, getStatus } = require('../controllers/AppController');
+const AppController = require('../controllers/AppController');
 
 
-app.get('/status', getStatus);
-app.get('/stats', getStats);
+app.get('/status', AppController.getStatus);
+app.get('/stats', AppController.getStats);
 
 module.exports = app;
 
