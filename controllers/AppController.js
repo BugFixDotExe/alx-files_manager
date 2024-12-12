@@ -7,11 +7,11 @@ const getStatus = ((req, res) => {
   }
 });
 
-const getStats = ((req, res) => {
-  const nbUsersCount = dbClient.nbUsers();
-  const filesCount = dbClient.nbFiles();
+async function getStats(req, res) {
+  const nbUsersCount = await dbClient.nbUsers();
+  const filesCount = await dbClient.nbFiles();
   res.status(200).json({ users: nbUsersCount, files: filesCount });
-});
+}
 
 module.exports = {
   getStatus,
