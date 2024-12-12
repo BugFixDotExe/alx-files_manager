@@ -1,12 +1,11 @@
 import express from 'express';
 
-const { getStats, getStatus } = require('./controllers/AppController');
+const route = require('./routes/index');
 
 require('dotenv').config();
 
+const PORT = process.env.PORT || 5000
 const app = express();
-
-app.get('/status', getStatus);
-app.get('/stats', getStats);
-
-app.listen(process.env.PORT, () => { console.log(`Server running on port ${process.env.PORT}`); });
+app.use(express.json())
+app.use('/', route);
+app.listen(PORT, () => { console.log(`Server running on port ${PORT}`); });
