@@ -3,14 +3,20 @@ import { createClient } from 'redis';
 class RedisClient {
   constructor() {
     this.redisClientConnection = createClient();
-    this.isConnected = false
+    this.isConnected = false;
+
     this.redisClientConnection.on('error', (error) => {
       console.error('Redis error:', error);
     });
-    this.redisClientConnection.connect()
-      .then(() => { this.isConnected = true; })
-      .catch(() => this.isConnected);
-    this.redisClientConnection.on('connection', () => { this.isConnected = true; });
+
+    this.redisClientConnection.on('ready', () => {
+      this.isConnected = true;
+      console.log('Redis is connected and ready to use');
+    });
+
+    this.redisClientConnection.connect().catch((error) => {
+      console.error('Error connecting to Redis:', error);
+    });
   }
 
   isAlive() {
@@ -33,7 +39,9 @@ class RedisClient {
   async set(key, incomingData, duration) {
     try {
       if (this.isAlive()) {
-        await this.redisClientConnection.set(key, incomingData, 'EX', duration);
+        await this.redisClientConnection.set(key, JSON.stringify(incomingData), {
+          EX: duration,
+        });
       }
     } catch (err) {
       console.error('Error setting data in Redis:', err);
@@ -50,6 +58,6 @@ class RedisClient {
     }
   }
 }
-
 const redisClient = new RedisClient();
+
 export default redisClient;
