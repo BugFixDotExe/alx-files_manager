@@ -7,14 +7,12 @@ const { ObjectId } = require('mongodb').ObjectId;
 class UsersController {
   static hashPassword(password) {
     return new Promise((resolve, reject) => {
-      const iterations = 10000;
-      const hashBytes = 64;
-      const digest = 'SHA1';
-      const salt = crypto.randomBytes(16).toString('hex');
-      crypto.pbkdf2(password, salt, iterations, hashBytes, digest, (err, key) => {
-        if (err) { return reject(err); }
-        resolve(key.toString('hex'));
-      });
+      try {
+        const hash = 'SHA1';
+        // const salt = crypto.randomBytes(16).toString('hex');
+        const hashedPassword = crypto.createHash(hash).update(password).digest('hex')
+        resolve(hashedPassword)
+      } catch (err) { reject(err); }
     });
   }
 
@@ -39,7 +37,6 @@ class UsersController {
         }
       });
     } catch (err) {
-      console.log(err);
       res.json(err.message);
     }
     return null;

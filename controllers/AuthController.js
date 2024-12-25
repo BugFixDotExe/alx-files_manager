@@ -7,16 +7,20 @@ const uuid = require('uuid');
 class AuthController {
   static async getConnect(req, res) {
     // This method plays the role of decoding the encoded.
+    let isUser = null;
     const authorizationHeader = req.headers.authorization
     const authKeyPayload = authorizationHeader.split(' ')[1]
     const originalPayloadUnencoded = Buffer.from(authKeyPayload, 'base64').toString('utf8')
     const [email, password] = originalPayloadUnencoded.split(':')
-    const userCollection = await dbClient.client.db().collection('users');
-    const isUser = await userCollection.findOne({ email });
-    if (!isUser) { return res.status(401).json({ error: 'Unauthorized' }); }
+    try {
+      const userCollection = await dbClient.client.db().collection('users');
+      isUser = await userCollection.findOne({ email });
+    } catch (err) { return res.status(401).json({ error: 'Unauthorized' }); }
 
-    const hashedVariant = UsersController.hashPassword(password);
+
+    const hashedVariant = UsersController.hashPassword(password.trim());
     hashedVariant.then(async (key) => {
+      console.log('key is', key)
       if (key !== isUser.password) { return res.status(401).json({ error: 'Unauthorized' }); }
       const token = uuid.v4()
       const authKey = `auth_${token}`
