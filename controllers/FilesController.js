@@ -9,6 +9,5 @@ class FilesController {
   const { name, type, data, parentId, isPublic } = req.body;
   if (!name) { return res.status(400).json({error: 'Missing name'})}
   if (!type) { return res.status(400).json({error: 'Missing type'})}
-  
-  
 }
+export default FilesController
