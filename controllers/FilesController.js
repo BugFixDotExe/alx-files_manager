@@ -62,7 +62,7 @@ class FilesController {
         const savedPayload = savedFile.ops[0];
         res.status(201).json(savedPayload);
       }
-    } catch (error) { console.log(error); return res.status(401).json({ error: 'xUnauthorized' }); }
+    } catch (error) { console.log(error); return res.status(401).json({ error: 'Unauthorized' }); }
   }
 }
 export default FilesController;
