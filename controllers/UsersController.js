@@ -10,8 +10,8 @@ class UsersController {
       try {
         const hash = 'SHA1';
         // const salt = crypto.randomBytes(16).toString('hex');
-        const hashedPassword = crypto.createHash(hash).update(password).digest('hex')
-        resolve(hashedPassword)
+        const hashedPassword = crypto.createHash(hash).update(password).digest('hex');
+        resolve(hashedPassword);
       } catch (err) { reject(err); }
     });
   }
@@ -47,7 +47,6 @@ class UsersController {
     const userToken = req.headers['x-token'];
     const authKey = `auth_${userToken}`;
     const id = await redisClient.get(authKey);
-    console.log('huh', id);
     do {
       isLive = dbClient.isAlive();
     } while (isLive !== true);
