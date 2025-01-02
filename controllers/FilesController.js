@@ -104,6 +104,51 @@ class FilesController {
       return res.status(401).json({ error: 'Unauthorized' });
     }
   }
+
+  static async getShow(req, res) {
+    const xTokenPayload = req.headers['x-token'];
+    const { id } = req.params;
+    let isValidKey;
+    try {
+      isValidKey = await redisClient.get(`auth_${xTokenPayload}`)
+      if (!isValidKey === null) { return res.status(401).json({ error: 'Unauthorized' }); }
+      const filesCollection = await dbClient.client.db().collection('files');
+      const fileObject = await filesCollection.findOne({ _id: ObjectId(id) });
+      res.status(201).json(fileObject);
+    } catch (err) { console.log(err); return res.status(401).json({ error: 'Unauthorized' }); }
+  }
+
+  static async getIndex(req, res) {
+    const xTokenPayload = req.headers['x-token'];
+    try {
+      const isValidKey = await redisClient.get(`auth_${xTokenPayload}`)
+      if (!isValidKey === null) { return res.status(401).json({ error: 'Unauthorized' }); }
+    } catch (Err) { console.log(Err); }
+
+    const parentId = req.query.parentId || 0;
+    console.log('Parent:', parentId);
+    const page = parseInt(req.query.page) || 0;
+    try {
+      const filesCollection = await dbClient.client.db().collection('files');
+      const documents = await filesCollection.aggregate([
+        { $match: { parentId } },
+        { $skip: (page * 20) },
+        { $limit: 20 }
+      ]).toArray();
+
+      if (documents === null) { return res.status(401).json({}); }
+      console.log(documents)
+      res.status(201).json({ page, limit: 20, documents });
+    } catch (err) { console.log(err); }
+  }
+
+  static async putPublish(req, res) {
+    
+  }
+
+  static async putUnpublish(req, res) {
+    
+  }
 }
 
 export default FilesController;
