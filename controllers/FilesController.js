@@ -5,7 +5,7 @@ const { ObjectId } = require('mongodb').ObjectId;
 const uuid = require('uuid');
 const fs = require('node:fs');
 const path = require('node:path');
-
+var mime = require('mime-types')
 require('dotenv').config();
 
 class FilesController {
@@ -172,9 +172,67 @@ class FilesController {
     } catch (err) { console.log(err); }
   }
 
-  // static async putUnpublish(req, res) {
-    
-  // }
+  static async putUnpublish(req, res) {
+    const xTokenPayload = req.headers['x-token']
+    const { id } = req.params;
+    let isValidKey;
+
+    try {
+      isValidKey = await redisClient.get(`auth_${xTokenPayload}`)
+      if (!isValidKey === null) { return res.status(401).json({ error: 'Unauthorized' }); }
+    } catch (err) { console.log(err); }
+
+
+    try {
+      const filesCollection = await dbClient.client.db().collection('files');
+      const userHasObject = await filesCollection.findOne({ userId: ObjectId(isValidKey) });
+      if (!userHasObject) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      const fileObject = await filesCollection.findOne({ _id: ObjectId(id) });
+      if (fileObject.userId.toString() !== isValidKey || !fileObject) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      await filesCollection.updateOne(
+        { _id: ObjectId(fileObject._id) },
+        { $set: { isPublic: false } }
+      )
+      res.status(200).json(fileObject);
+    } catch (err) { console.log(err); }
+  }
+
+  static async getFile(req, res) {
+    const xTokenPayload = req.headers['x-token']
+    const { id } = req.params;
+    let isValidKey;
+
+    try {
+      isValidKey = await redisClient.get(`auth_${xTokenPayload}`)
+      if (!isValidKey === null) { return res.status(401).json({ error: 'Unauthorized' }); }
+    } catch (err) { console.log(err); }
+
+
+    try {
+      const filesCollection = await dbClient.client.db().collection('files');
+      const userHasObject = await filesCollection.findOne({ userId: ObjectId(isValidKey) });
+      if (!userHasObject) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+
+      const fileObject = await filesCollection.findOne({ _id: ObjectId(id) });
+      if (fileObject.userId.toString() !== isValidKey || !fileObject) {
+        return res.status(404).json({ error: 'Not found' });
+      }
+      if (fileObject.isPublic === false) { return res.status(404).json({ error: 'Not found' }); }
+      if (fileObject.type === 'folder') { return res.status(400).json({ error: 'A folder doesn\'t have content' }); }
+      const mimeType = mime.lookup(fileObject.name);
+      // setting a custome header to the mime-type
+      res.set('Content-Type', mimeType);
+      res.status(200).json(fileObject)
+    } catch (error) { console.log(error); }
+  }
 }
 
 export default FilesController;
